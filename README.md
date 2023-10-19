@@ -1,2 +1,2 @@
-# evcd-gra
-EVC Deployment Gradio App
+# evcUI-gradio
+EVC UI Gradio Application
