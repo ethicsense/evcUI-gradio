@@ -30,42 +30,87 @@ def str2bool(v):
 
 
 def test(url, mode, server_name, server_port):
-    default_set, default_cfg, user_cfg, modelfile, dockerfile, mode, owner, task, version, model_name, data = evc.get_myprj(url)
+    default_set, default_cfg, user_cfg, modelfile, dockerfile, owner, task, version, model_name, data = evc.get_myprj(url)
 
     for run in default_cfg:
         sequence = run['activation']
 
         if sequence == 'register':
-            builders = evc.device_control.host_config(default_set)
+            builders = evc.device_control.host_config(default_set, user_cfg)
         
         elif sequence == 'build':
             # if str2bool(clean_db):
             #     print()
             #     print()
             #     evc.clean_db()
-            evc.clean_db()
-            evc.model_control.build(builders)
+            evc.clean_db(model_name, version)
+            evc.model_control.build(
+                builders, owner, model_name, task, version, modelfile, dockerfile
+            )
 
         elif sequence == 'download':
-            evc.model_control.download(server_port)
+            evc.model_control.download(
+                user_cfg, owner, model_name, task, version, modelfile, dockerfile,
+                server_port
+            )
 
         elif sequence == 'run':
-            out = evc.model_control.run(mode, server_name, server_port)
+            out = evc.model_control.run(
+                user_cfg, owner, model_name, task, version, modelfile, dockerfile,
+                mode, server_name, server_port
+            )
 
     return out
 
 
-with gr.Blocks() as demo:    
+with gr.Blocks() as demo:
+
     with gr.Row():
+
         with gr.Column():
-            url = gr.Textbox(label="Project URL")
-            mode = gr.Textbox(label="Activation Mode")
-            server_name = gr.Textbox(label="Server Name")
-            server_port = gr.Textbox(label="Server Port")
-        btn = gr.Button("Run", scale=0)
+            url = gr.Textbox(label="Project URL", value="https://github.com/ethicsense/esp-python.git")
+            mode = gr.Textbox(label="Activation Mode", value="flask")
+            server_name = gr.Textbox(label="Server Name", value="0.0.0.0")
+            server_port = gr.Textbox(label="Server Port", value="7999")
+
+        
+    with gr.Row():
+        btn1 = gr.Button("Add Group", scale=0)
+        title = gr.Markdown(
+            """
+            # <center> Target Nodes Information </center>
+            """
+        )
+        btn2 = gr.Button("Run EVC", scale=0)
+
+    with gr.Group():         
+    
+        with gr.Row():
+            group = gr.Textbox(label="Group Name", scale=0)
+
+            with gr.Column():
+
+                with gr.Row():
+                    node = gr.Textbox(label="Node Name")
+                    ip = gr.Textbox(label="IP Address")
+                    port = gr.Textbox(label="Port Number")
+                    app = gr.Textbox(label="Model App URL")
+                
+                with gr.Row():
+                    node = gr.Textbox(label="Node Name")
+                    ip = gr.Textbox(label="IP Address")
+                    port = gr.Textbox(label="Port Number")
+                    app = gr.Textbox(label="Model App URL")
+                
+                with gr.Row():
+                    node = gr.Textbox(label="Node Name")
+                    ip = gr.Textbox(label="IP Address")
+                    port = gr.Textbox(label="Port Number")
+                    app = gr.Textbox(label="Model App URL")
+
 
     output = gr.Textbox()
-    btn.click(test, [url, mode, server_name, server_port], output)
+    btn2.click(test, [url, mode, server_name, server_port], output)
 
 
 demo.queue().launch(
