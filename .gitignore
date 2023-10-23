@@ -1,2 +1,5 @@
 # ignore testing logs, datas
 logs/
+
+# ignore preview samples
+Image/
